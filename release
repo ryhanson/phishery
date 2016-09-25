@@ -1,0 +1,24 @@
+#!/bin/sh
+
+for OS in "linux" "darwin" "windows" "freebsd"; do
+	GOOS=$OS  CGO_ENABLED=0 GOARCH=amd64 go build
+	FOLDER=go-phish1.0.0$OS-amd64
+	ARCHIVE=$FOLDER.tar.gz
+	mkdir $FOLDER
+	cp LICENSE $FOLDER
+	cp credentials.json $FOLDER
+	cp settings.json $FOLDER
+	cp server.crt $FOLDER
+	cp server.key $FOLDER
+	cp template.dotx $FOLDER
+	if [ $OS = "windows" ] ; then
+		cp go-phish.exe $FOLDER
+		rm go-phish.exe
+	else
+		cp go-phish $FOLDER
+		rm go-phish
+	fi
+       	tar -czf $ARCHIVE $FOLDER
+	rm -rf $FOLDER
+	echo $ARCHIVE
+done

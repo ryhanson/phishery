@@ -1,0 +1,12 @@
+{
+  "ip": "0.0.0.0",
+  "port": "443",
+  "sslCert": "server.crt",
+  "sslKey": "server.key",
+  "basicRealm": "Secure Document Gateway",
+  "responseStatus": 200,
+  "responseFile": "template.dotx",
+  "responseHeaders": [
+    ["Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.template"]
+  ]
+}
