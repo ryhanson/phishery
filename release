@@ -2,7 +2,7 @@
 
 for OS in "linux" "darwin" "windows" "freebsd"; do
 	GOOS=$OS  CGO_ENABLED=0 GOARCH=amd64 go build
-	FOLDER=go-phish1.0.1$OS-amd64
+	FOLDER=phishery1.0.2$OS-amd64
 	ARCHIVE=$FOLDER.tar.gz
 	mkdir $FOLDER
 	cp LICENSE $FOLDER
@@ -12,11 +12,11 @@ for OS in "linux" "darwin" "windows" "freebsd"; do
 	cp server.key $FOLDER
 	cp template.dotx $FOLDER
 	if [ $OS = "windows" ] ; then
-		cp go-phish.exe $FOLDER
-		rm go-phish.exe
+		cp phishery.exe $FOLDER
+		rm phishery.exe
 	else
-		cp go-phish $FOLDER
-		rm go-phish
+		cp phishery $FOLDER
+		rm phishery
 	fi
     COPYFILE_DISABLE=1 tar -czf $ARCHIVE $FOLDER
 	rm -rf $FOLDER

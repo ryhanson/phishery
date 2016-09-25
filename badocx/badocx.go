@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/ryhanson/archivex"
+	"github.com/ryhanson/phishery/archivex"
 )
 
 type Docx struct {
@@ -61,6 +61,7 @@ func (d *Docx) SetTemplate(url string) error {
 	} else {
 		// TODO: Check if template already exists and update
 		d.newFiles[relsPath] = settingsRels
+		return errors.New("Word document might already have a template URL")
 	}
 
 	settingsBytes, err := d.retrieveFileContents(settingsPath)
@@ -100,11 +101,11 @@ func (d *Docx) retrieveFileContents(filename string) ([]byte, error) {
 func newSettingsRels(url string) []byte {
 	newRels :=
 		`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-			<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+		<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 			<Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate"
 			Target="`+url+`"
-		TargetMode="External"/>
-	</Relationships>`
+			TargetMode="External"/>
+		</Relationships>`
 
 	return []byte(newRels)
 }

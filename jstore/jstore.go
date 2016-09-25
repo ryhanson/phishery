@@ -1,4 +1,4 @@
-package gp
+package jstore
 
 import (
 	"os"
@@ -12,12 +12,25 @@ type JsonStore struct {
 	filename string;
 }
 
+func NewStore(jsonfile string) (*JsonStore, error) {
+	store := JsonStore{
+		filename:  jsonfile,
+	}
+
+	if _, err := os.Stat(store.filename); err == nil {
+		return &store, nil
+	}
+
+	_, err := os.Create(store.filename)
+	return &store, err
+}
+
 func (store *JsonStore) AddObject(obj interface{}) (bool, error) {
 	objs := make(map[string]interface{})
 	authJson, _ := json.Marshal(obj)
 	authSum := getMD5(string(authJson))
 
-	objs, err := store.loadStore()
+	objs, err := store.LoadStore()
 	if err != nil {
 		return false, err
 	}
@@ -35,7 +48,7 @@ func (store *JsonStore) AddObject(obj interface{}) (bool, error) {
 	return true, ioutil.WriteFile(store.filename, out, 0755)
 }
 
-func (store *JsonStore) loadStore() (map[string]interface{}, error) {
+func (store *JsonStore) LoadStore() (map[string]interface{}, error) {
 	objs := make(map[string]interface{})
 
 	file, err := os.Open(store.filename)

