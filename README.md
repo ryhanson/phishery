@@ -8,7 +8,7 @@ ability to inject any .docx file with a URL is possible using the go-phish's `-u
 `-badocx [out .docx]` options.
 
 ### Download
-Operating specific packages can be download [from here](#).
+Operating specific packages can be [downloaded from here](https://github.com/ryhanson/go-phish/releases).
 
 ### Install
 Extract the archive, and optionally, install binary to $PATH
