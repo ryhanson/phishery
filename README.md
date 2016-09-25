@@ -4,8 +4,8 @@ go-phish is a Simple SSL Enabled HTTP server with the primary purpose of phishin
 
 The power of go-phish is best demonstrated by setting a Word document's template to a go-phish URL. This causes 
 Microsoft Word to make a request to the URL, resulting in an Authentication Dialog being shown to the end-user. The
-ability to inject any .docx file with a URL is possible using the go-phish's `-url [url]`, `-docx [in .docx]`, and 
-`-badocx [out .docx]` options.
+ability to inject any .docx file with a URL is possible using the go-phish's 
+`-i [in docx]`, `-o [out docx]`, and `-u [url]` options.
 
 ### Download
 Operating specific packages can be [downloaded from here](https://github.com/ryhanson/go-phish/releases).
