@@ -86,10 +86,16 @@ func createBadocx(url string, in string, out string) {
 	wordDocx.SetTemplate(url)
 
 	np.Event("Saving injected Word document to: " + out)
-	wordDocx.WriteBadocx(out)
+	if err := wordDocx.WriteBadocx(out); err != nil {
+		np.Error("Error injecting Word doc: " + err.Error())
+		os.Exit(1)
+	}
 
-	wordDocx.Close()
+	if err := wordDocx.Close(); err != nil {
+		np.Error("Error closing injected Word doc: " + err.Error())
+		os.Exit(1)
+	}
+
 	np.Info("Injected Word document has been saved!")
-
 	os.Exit(0)
 }

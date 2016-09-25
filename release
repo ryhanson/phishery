@@ -2,7 +2,7 @@
 
 for OS in "linux" "darwin" "windows" "freebsd"; do
 	GOOS=$OS  CGO_ENABLED=0 GOARCH=amd64 go build
-	FOLDER=go-phish1.0.0$OS-amd64
+	FOLDER=go-phish1.0.1$OS-amd64
 	ARCHIVE=$FOLDER.tar.gz
 	mkdir $FOLDER
 	cp LICENSE $FOLDER
@@ -18,7 +18,7 @@ for OS in "linux" "darwin" "windows" "freebsd"; do
 		cp go-phish $FOLDER
 		rm go-phish
 	fi
-       	tar -czf $ARCHIVE $FOLDER
+    COPYFILE_DISABLE=1 tar -czf $ARCHIVE $FOLDER
 	rm -rf $FOLDER
 	echo $ARCHIVE
 done

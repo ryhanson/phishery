@@ -1,6 +1,6 @@
 package gp
 
-const VERSION = "1.0"
+const VERSION = "1.0.1"
 
 type AuthInfo struct {
 	Host	  string `json:"host"`

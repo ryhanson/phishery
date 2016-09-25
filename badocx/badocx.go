@@ -5,9 +5,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"strings"
-	"os"
 
-	"github.com/jhoonb/archivex"
+	"github.com/ryhanson/archivex"
 )
 
 type Docx struct {
@@ -41,15 +40,14 @@ func (d *Docx) Close() error {
 }
 
 func (d *Docx) WriteBadocx(filename string) error {
-	newDoc := new(archivex.ZipFile)
+	newDoc := archivex.ZipFile{}
 
-	newDoc.Create("badocx")
+	newDoc.Create(filename)
 	for p, b := range d.newFiles {
 		newDoc.Add(p, b)
 	}
-	newDoc.Close()
 
-	return os.Rename(newDoc.Name, filename)
+	return newDoc.Close()
 }
 
 func (d *Docx) SetTemplate(url string) error {
@@ -101,10 +99,10 @@ func (d *Docx) retrieveFileContents(filename string) ([]byte, error) {
 
 func newSettingsRels(url string) []byte {
 	newRels :=
-	`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-		<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-		<Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate"
-		Target="`+url+`"
+		`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+			<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+			<Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate"
+			Target="`+url+`"
 		TargetMode="External"/>
 	</Relationships>`
 
