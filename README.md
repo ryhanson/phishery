@@ -4,11 +4,11 @@ phishery is a Simple SSL Enabled HTTP server with the primary purpose of phishin
 
 The power of phishery is best demonstrated by setting a Word document's template to a phishery URL. This causes 
 Microsoft Word to make a request to the URL, resulting in an Authentication Dialog being shown to the end-user. The
-ability to inject any .docx file with a URL is possible using the phishery's 
+ability to inject any .docx file with a URL is possible using phishery's 
 `-i [in docx]`, `-o [out docx]`, and `-u [url]` options.
 
 ### Download
-Operating specific packages can be [downloaded from here](https://github.com/ryhanson/phishery/releases).
+Operating system specific packages can be [downloaded from here](https://github.com/ryhanson/phishery/releases).
 
 ### Install
 Extract the archive, and optionally, install binary to $PATH
