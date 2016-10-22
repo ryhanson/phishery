@@ -1,6 +1,9 @@
 # phishery
 
-phishery is a Simple SSL Enabled HTTP server with the primary purpose of phishing credentials via Basic Authentication. 
+Phishery is a Simple SSL Enabled HTTP server with the primary purpose of phishing credentials via Basic Authentication. 
+Phishery also provides the ability easily to inject the URL into a .docx Word document.
+
+![Basic Auth Dialog in Word](https://raw.githubusercontent.com/ryhanson/phishery/master/screenshots/PhisheryDialog.jpg "Basic Auth Dialog in Word")
 
 The power of phishery is best demonstrated by setting a Word document's template to a phishery URL. This causes 
 Microsoft Word to make a request to the URL, resulting in an Authentication Dialog being shown to the end-user. The
