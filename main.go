@@ -44,6 +44,7 @@ func main() {
 		flUrl		= flag.String("u", "", "")
 		flDocx		= flag.String("i", "", "")
 		flBadocx	= flag.String("o", "", "")
+		flAggressive	= flag.Bool("a", false, "")
 	)
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
@@ -66,7 +67,7 @@ func main() {
 		os.Exit(1)
 	}()
 
-	err := phish.StartPhishery(*flSettings, *flCredentials)
+	err := phish.StartPhishery(*flSettings, *flCredentials, *flAggressive)
 	if err != nil {
 		neat.Error("Error starting Phishery server: %s", err)
 		os.Exit(1)
