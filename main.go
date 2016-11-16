@@ -1,19 +1,18 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
-	"flag"
-	"fmt"
 
 	"github.com/ryhanson/phishery/badocx"
-	"github.com/ryhanson/phishery/phish"
 	"github.com/ryhanson/phishery/neatprint"
+	"github.com/ryhanson/phishery/phish"
 )
 
-const usage =
-`|\   \\\\__   O         __    _      __
+const usage = `|\   \\\\__   O         __    _      __
 | \_/    o \  o  ____  / /_  (_)____/ /_  ___  _______  __
 > _   (( <_ oO  / __ \/ __ \/ / ___/ __ \/ _ \/ ___/ / / /
 | / \__+___/   / /_/ / / / / (__  ) / / /  __/ /  / /_/ /
@@ -32,19 +31,22 @@ const usage =
     -u              The phishery URL to use as the Word document template.
     -i              The Word .docx file to inject with a template URL.
     -o              The new Word .docx file with the injected template URL.
+    -k              Disable TLS support.
 `
 
 var neat = neatprint.NewNeatPrint()
 
 func main() {
 	var (
-		flVersion	= flag.Bool("v", false, "")
-		flSettings	= flag.String("s", "settings.json", "")
-		flCredentials	= flag.String("c", "credentials.json", "")
-		flUrl		= flag.String("u", "", "")
-		flDocx		= flag.String("i", "", "")
-		flBadocx	= flag.String("o", "", "")
+		flVersion     = flag.Bool("v", false, "")
+		flSettings    = flag.String("s", "settings.json", "")
+		flCredentials = flag.String("c", "credentials.json", "")
+		flUrl         = flag.String("u", "", "")
+		flDocx        = flag.String("i", "", "")
+		flBadocx      = flag.String("o", "", "")
+		flIsCleartext = flag.Bool("k", false, "")
 	)
+
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
 
@@ -59,14 +61,14 @@ func main() {
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func(){
+	go func() {
 		<-c
 		fmt.Println()
 		neat.Event("Stopping auth server...")
 		os.Exit(1)
 	}()
 
-	err := phish.StartPhishery(*flSettings, *flCredentials)
+	err := phish.StartPhishery(*flSettings, *flCredentials, *flIsCleartext)
 	if err != nil {
 		neat.Error("Error starting Phishery server: %s", err)
 		os.Exit(1)
