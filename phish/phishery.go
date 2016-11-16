@@ -1,16 +1,16 @@
 package phish
 
 import (
-	"net/http"
-	"strings"
 	"encoding/base64"
 	"errors"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"time"
 
-	"github.com/ryhanson/phishery/neatprint"
 	"github.com/ryhanson/phishery/jstore"
+	"github.com/ryhanson/phishery/neatprint"
 )
 
 type Phishery struct {
@@ -20,7 +20,7 @@ type Phishery struct {
 
 var neat = neatprint.NewNeatPrint()
 
-func StartPhishery(settingsFile string, credsFile string) error {
+func StartPhishery(settingsFile string, credsFile string, isCleartext bool) error {
 	settings := loadSettings(settingsFile)
 	credStore, err := jstore.NewStore(credsFile)
 	if err != nil {
@@ -31,12 +31,16 @@ func StartPhishery(settingsFile string, credsFile string) error {
 	listenOn := settings.IP + ":" + settings.Port
 	srv := Phishery{
 		credStore: credStore,
-		settings: settings,
+		settings:  settings,
 	}
 
-	neat.Event("Starting HTTPS Auth Server on: %s", listenOn)
 	http.HandleFunc("/", srv.handler)
 
+	if isCleartext {
+		neat.Event("Starting HTTP Auth Server on: %s", listenOn)
+		return http.ListenAndServe(listenOn, nil)
+	}
+	neat.Event("Starting HTTPS Auth Server on: %s", listenOn)
 	return http.ListenAndServeTLS(listenOn, settings.SSLCert, settings.SSLKey, nil)
 }
 
@@ -53,7 +57,7 @@ func (srv *Phishery) processAuth(auth string) (AuthInfo, error) {
 		return authInfo, errors.New("Missing Authorization Credentials")
 	}
 
-	authInfo = AuthInfo {
+	authInfo = AuthInfo{
 		Username: creds[0],
 		Password: creds[1],
 	}
@@ -61,23 +65,23 @@ func (srv *Phishery) processAuth(auth string) (AuthInfo, error) {
 	return authInfo, nil
 }
 
-func (srv *Phishery) handler(resp http.ResponseWriter, req *http.Request)  {
+func (srv *Phishery) handler(resp http.ResponseWriter, req *http.Request) {
 	printReq(req)
 
 	auth := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
-	if (len(auth) == 2) {
-		authInfo, err := srv.processAuth(auth[1]);
+	if len(auth) == 2 {
+		authInfo, err := srv.processAuth(auth[1])
 		if err != nil {
 			neat.Error(err.Error())
 			return
 		}
 
-		authInfo.Host = stripPort(req.Host);
+		authInfo.Host = stripPort(req.Host)
 		authInfo.Request = req.Method + " " + req.RequestURI
-		authInfo.UserAgent = req.UserAgent();
-		authInfo.IPAddress =  stripPort(req.RemoteAddr);
+		authInfo.UserAgent = req.UserAgent()
+		authInfo.IPAddress = stripPort(req.RemoteAddr)
 
-		created, err := srv.credStore.AddObject(authInfo);
+		created, err := srv.credStore.AddObject(authInfo)
 		if err != nil {
 			neat.Error("Error writing credentials: %s", err)
 		}
@@ -94,7 +98,7 @@ func (srv *Phishery) handler(resp http.ResponseWriter, req *http.Request)  {
 	}
 	neat.Info("Sending Basic Auth response to: %s", stripPort(req.RemoteAddr))
 
-	resp.Header().Set("WWW-Authenticate", `Basic realm="` + srv.settings.BasicRealm + `"`)
+	resp.Header().Set("WWW-Authenticate", `Basic realm="`+srv.settings.BasicRealm+`"`)
 	resp.WriteHeader(401)
 	resp.Write([]byte("401 Unauthorized\n"))
 }
